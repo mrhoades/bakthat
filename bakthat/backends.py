@@ -296,10 +296,12 @@ class SwiftBackend(BakthatBackend):
 
         from swiftclient import Connection, ClientException
 
-        self.con = Connection(self.conf["auth_url"], self.conf["access_key"], 
-                              self.conf["secret_key"],
-                              auth_version=self.conf["auth_version"],
-                              insecure=True)
+        self.con = Connection(self.conf["auth_url"],
+                                          self.conf["access_key"],
+                                          self.conf["secret_key"],
+                                          auth_version=self.conf["auth_version"],
+                                          tenant_name=self.conf["tenant_name"],
+                                          insecure=self.conf["insecure"])
 
         region_name = self.conf["region_name"]
         if region_name == DEFAULT_LOCATION:
@@ -330,9 +332,32 @@ class SwiftBackend(BakthatBackend):
         percent = int(complete * 100.0 / total)
         log.info("Upload completion: {0}%".format(percent))
 
-    def upload(self, keyname, filename, **kwargs):
-        fp = open(filename, "rb")
-        self.con.put_object(self.container, keyname, fp)
+    def upload(self, input_filename, path_to_file, **kwargs):
+        # fp = open(filename, "rb")
+        # self.con.put_object(self.container, keyname, fp)
+
+        import swiftclient.service
+        from swiftclient.service import SwiftService
+        from swiftclient.service import SwiftUploadObject
+
+        swiftclient.service._default_global_options['os_auth_url'] = self.conf["auth_url"]
+        swiftclient.service._default_global_options['os_username'] = self.conf["access_key"]
+        swiftclient.service._default_global_options['os_password'] = self.conf["secret_key"]
+        swiftclient.service._default_global_options['os_tenant_name'] = self.conf["tenant_name"]
+        swiftclient.service._default_global_options['auth_version'] = self.conf["auth_version"]
+        swiftclient.service._default_global_options['insecure'] = self.conf["insecure"]
+
+        if 'segment_size' not in self.conf:
+            self.conf["segment_size"] = '1073741824'
+        if 'chunk_size' not in self.conf:
+            self.conf["chunk_size"] = '20480'
+
+        with SwiftService() as ss:
+            for r in ss.upload(self.conf["s3_bucket"],
+                               [SwiftUploadObject(path_to_file, input_filename)],
+                               {'segment_size': self.conf["segment_size"]}):
+                print 'SUCCESSFUL: ' + r['success']
+        pass
 
     def ls(self):
         headers, objects = self.con.get_container(self.conf["s3_bucket"])
