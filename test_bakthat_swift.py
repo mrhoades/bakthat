@@ -49,7 +49,7 @@ class BakthatSwiftBackendTestCase(unittest.TestCase):
 
         os.remove(self.test_filename)
 
-        bakthat.delete(backup_data["stored_filename"], "swift", profile=self.test_profile)
+        bakthat.delete(backup_data.stored_filename, "swift", profile=self.test_profile)
 
         #self.assertEqual(bakthat.match_filename(self.test_filename, "swift",
         #                                        profile=self.test_profile), [])
@@ -63,8 +63,7 @@ class BakthatSwiftBackendTestCase(unittest.TestCase):
         #                                        )[0]["filename"],
         #                 self.test_filename)
 
-        bakthat.restore(self.test_filename, "swift",
-                        profile=self.test_profile)
+        bakthat.restore(self.test_filename, "swift", profile=self.test_profile)
 
         restored_hash = hashlib.sha1(
             open(self.test_filename).read()).hexdigest()
@@ -72,22 +71,19 @@ class BakthatSwiftBackendTestCase(unittest.TestCase):
         self.assertEqual(self.test_hash, restored_hash)
 
         os.remove(self.test_filename)
+        pass
 
-        test_deleted = bakthat.delete_older_than(self.test_filename, "1Y",
-                                                 "swift",
-                                                 profile=self.test_profile)
+        test_deleted = bakthat.delete_older_than(self.test_filename, "1Y",  profile=self.test_profile)
 
         self.assertEqual(test_deleted, [])
 
         time.sleep(10)
 
-        test_deleted = bakthat.delete_older_than(self.test_filename, "9s",
-                                                 "swift",
-                                                 profile=self.test_profile)
+        test_deleted = bakthat.delete_older_than(self.test_filename, "9s", profile=self.test_profile)
 
         key_deleted = test_deleted[0]
 
-        self.assertEqual(key_deleted, backup_res["stored_filename"])
+        self.assertEqual(key_deleted.stored_filename, backup_res.stored_filename)
 
         #self.assertEqual(bakthat.match_filename(self.test_filename,
         #                                        "swift",
@@ -117,7 +113,7 @@ class BakthatSwiftBackendTestCase(unittest.TestCase):
 
         os.remove(self.test_filename)
 
-        bakthat.delete(backup_data["stored_filename"], "swift",
+        bakthat.delete(backup_data.stored_filename, "swift",
                        profile=self.test_profile)
 
         #self.assertEqual(bakthat.match_filename(self.test_filename,
