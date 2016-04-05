@@ -353,11 +353,29 @@ class SwiftBackend(BakthatBackend):
             self.conf["chunk_size"] = '20480'
 
         with SwiftService() as ss:
-            for r in ss.upload(self.conf["s3_bucket"],
+            for result in ss.upload(self.conf["s3_bucket"],
                                [SwiftUploadObject(path_to_file, input_filename)],
                                {'segment_size': self.conf["segment_size"]}):
-                print 'SUCCESSFUL: ' + str(r['success'])
-        pass
+                if not str(result['success']):
+                    self.print_upload_failure(path_to_file, result)
+                    raise Exception('Upload Failure of File: ' + path_to_file)
+
+    def print_upload_failure(self, result_object):
+        if type(result_object) == dict:
+            for k, v in result_object.items():
+                if hasattr(v, '__iter__'):
+                    print k
+                    self.print_upload_failure(v)
+                else:
+                    print '%s : %s' % (k, v)
+        elif type(result_object) == list:
+            for v in obj:
+                if hasattr(v, '__iter__'):
+                    self.print_upload_failure(v)
+                else:
+                    print
+        else:
+            print result_object
 
     def ls(self):
         headers, objects = self.con.get_container(self.conf["s3_bucket"])
