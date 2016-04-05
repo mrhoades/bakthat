@@ -356,7 +356,7 @@ class SwiftBackend(BakthatBackend):
             for r in ss.upload(self.conf["s3_bucket"],
                                [SwiftUploadObject(path_to_file, input_filename)],
                                {'segment_size': self.conf["segment_size"]}):
-                print 'SUCCESSFUL: ' + r['success']
+                print 'SUCCESSFUL: ' + str(r['success'])
         pass
 
     def ls(self):
