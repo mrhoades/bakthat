@@ -31,15 +31,16 @@ class BakthatSwiftBackendTestCase(unittest.TestCase):
         self.test_profile = "test_swift"
 
     def test_swift_backup_restore(self):
-        backup_data = bakthat.backup(self.test_file.name, "swift", password="",
-                                     profile=self.test_profile)
+        backup_data = bakthat.backup(self.test_file.name, "swift", password="", profile=self.test_profile)
         log.info(backup_data)
 
         #self.assertEqual(bakthat.match_filename(self.test_filename, "swift",
         #                                        profile=self.test_profile
         #                                        )[0]["filename"],
         #                 self.test_filename)
-        # sleep(5)
+
+        sleep(5)
+
         bakthat.restore(self.test_filename, "swift", profile=self.test_profile)
 
         restored_hash = hashlib.sha1(
